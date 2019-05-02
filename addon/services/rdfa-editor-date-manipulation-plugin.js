@@ -66,7 +66,7 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
           editor.replaceNodeWithHTML(ctx.richNode[0].parent.parent.domNode , this.setCurrentDateHtml(ctx));
         }
       } );
-  }).restartable(),
+  }),
 
   /**
    * Given context object, tries to detect a context the plugin can work on
