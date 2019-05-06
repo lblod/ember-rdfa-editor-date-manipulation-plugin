@@ -108,7 +108,7 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
   createCurrentDateTimeHtml(nodeToReplace){
     let current = moment();
     let content = current.toISOString();
-    let value = `${current.format('LL')} ${current.hour()}:${current.minutes()}`;
+    let value = moment(content).format('LL, LT');
 
     let newDomNode = nodeToReplace.cloneNode(true);
     newDomNode.textContent = value;
