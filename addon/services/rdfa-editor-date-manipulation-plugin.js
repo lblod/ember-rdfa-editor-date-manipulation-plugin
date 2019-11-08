@@ -54,68 +54,32 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
    * @public
    */
   execute: task(function * (hrId, contexts, hintsRegistry, editor) {
-    contexts
-      .filter(this.detectRelevantContext)
-      .forEach( (ctx) => {
-        if(ctx.richNodes.length == 0 || ! ctx.richNodes[0].parent ) {
-          // TODO: the context does not exist anymore.  Do we need to
-          // recalculate the context again and see if the new nodes
-          // can be used for updating the contents?
-          console.warn( "Context does not have right parents for setting the date" );
-        } else {
-          editor.replaceNodeWithHTML(ctx.richNodes[0].parent.parent.domNode , this.setCurrentDateHtml(ctx));
-        }
-      } );
-  }),
+    const location = [ editor.richNode.start, editor.richNode.end ];
 
-  /**
-   * Given context object, tries to detect a context the plugin can work on
-   *
-   * @method detectRelevantContext
-   *
-   * @param {Object} context Text snippet at a specific location with an RDFa context
-   *
-   * @return {String} URI of context if found, else empty string.
-   *
-   * @private
-   */
-  detectRelevantContext(context){
-    //Seek for:  <span class="annotation" property="besluit:geplandeStart" datatype="xsd:date" content=""><span typeOf="ext:currentDate">&nbsp;</span></span>
-    if(context.context.find( ({ predicate, object }) => predicate === 'a' && object === 'http://mu.semte.ch/vocabularies/ext/currentDate'))
-      return true;
-    return false;
-  },
+    const currentDateNodes = editor.selectContext(location, {
+      scope: "inner",
+      datatype : "http://say.data.gift/manipulators/insertion/currentDate"
+    });
+    const currentDateTimeNodes = editor.selectContext(location, {
+      scope: "inner",
+      datatype : "http://say.data.gift/manipulators/insertion/currentDateTime"
+    });
 
-  belongsToDateTime(context){
-    return context.context.slice(-2)[0].datatype == 'http://www.w3.org/2001/XMLSchema#dateTime';
-  },
+    const currentTime = moment();
 
-  setCurrentDateHtml(context){
-    let nodeToReplace = context.richNodes[0].parent.parent.domNode;
-    if(this.belongsToDateTime(context)){
-      return this.createCurrentDateTimeHtml(nodeToReplace);
-    }
-    return this.createDateHtml(nodeToReplace);
-  },
-
-  createDateHtml(nodeToReplace){
-    let newDomNode = nodeToReplace.cloneNode(true);
-    newDomNode.textContent = moment().format('LL');
-    newDomNode.setAttribute('content', moment().format('YYYY-MM-DD'));
-    return newDomNode.outerHTML;
-  },
-
-  createCurrentDateTimeHtml(nodeToReplace){
-    let current = moment();
-    let content = current.toISOString();
-    let value = moment(content).format('LL, LT');
-
-    let newDomNode = nodeToReplace.cloneNode(true);
-    newDomNode.textContent = value;
-    newDomNode.setAttribute('content', content);
-    return newDomNode.outerHTML;
-  }
-
+    editor.update(currentDateNodes, {
+      set: {
+        content: currentTime.format('YYYY-MM-DD'),
+        innerHTML: currentTime.format('LL')
+      }
+    });
+    editor.update(currentDateTimeNodes, {
+      set: {
+        content: currentTime.toISOString(),
+        innerHTML: currentTime.format('LL, LT')
+      }
+    });
+  })
 });
 
 RdfaEditorDateManipulationPlugin.reopen({
