@@ -46,30 +46,35 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
    */
   execute: task(function * (hrId, contexts, hintsRegistry, editor) {
     const location = [ editor.richNode.start, editor.richNode.end ];
+    const updatedLocation = hintsRegistry.updateLocationToCurrentIndex(hrId, location);
 
-    const currentDateNodes = editor.selectContext(location, {
+    const currentDateNodes = editor.selectContext(updatedLocation, {
       scope: "inner",
       datatype : "http://say.data.gift/manipulators/insertion/currentDate"
     });
-    const currentDateTimeNodes = editor.selectContext(location, {
+    const currentDateTimeNodes = editor.selectContext(updatedLocation, {
       scope: "inner",
       datatype : "http://say.data.gift/manipulators/insertion/currentDateTime"
     });
 
     const currentTime = moment();
 
-    editor.update(currentDateNodes, {
-      set: {
-        content: currentTime.format('YYYY-MM-DD'),
-        innerHTML: currentTime.format('LL')
-      }
-    });
-    editor.update(currentDateTimeNodes, {
-      set: {
-        content: currentTime.toISOString(),
-        innerHTML: currentTime.format('LL, LT')
-      }
-    });
+    if (!editor.isEmpty(currentDateNodes)) {
+      editor.update(currentDateNodes, {
+        set: {
+          content: currentTime.format('YYYY-MM-DD'),
+          innerHTML: currentTime.format('LL')
+        }
+      });
+    }
+    if (!editor.isEmpty(currentDateTimeNodes)) {
+      editor.update(currentDateTimeNodes, {
+        set: {
+          content: currentTime.toISOString(),
+          innerHTML: currentTime.format('LL, LT')
+        }
+      });
+    }
   })
 });
 
