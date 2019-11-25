@@ -62,6 +62,7 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
     if (!editor.isEmpty(currentDateNodes)) {
       editor.update(currentDateNodes, {
         set: {
+          datatype: "xsd:date",
           content: currentTime.format('YYYY-MM-DD'),
           innerHTML: currentTime.format('LL')
         }
@@ -70,6 +71,7 @@ const RdfaEditorDateManipulationPlugin = Service.extend({
     if (!editor.isEmpty(currentDateTimeNodes)) {
       editor.update(currentDateTimeNodes, {
         set: {
+          datatype: "xsd:dateTime",
           content: currentTime.toISOString(),
           innerHTML: currentTime.format('LL, LT')
         }
